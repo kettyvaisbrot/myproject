@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'appointments/styles.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h2>Customer Dashboard</h2>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div>
+        <h3>Schedule a New Appointment</h3>
+        <form id="appointment-form" method="post" action="">
+            {% csrf_token %}
+            {{ form.date_time.label_tag }}
+            {{ form.date_time }}
+
+            <p></p>
+
+            {{ form.time.label_tag }}
+            {{ form.time}}
+
+
+            <button type="submit">Schedule Appointment</button>
+
+            {% if form.errors %}
+                <ul class="errorlist">
+                    {% for field, error_list in form.errors.items %}
+                        <li>{{ field }}: {{ error_list.0 }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </form>
+    </div>
+
+    <div>
+        <h3>Your Future Appointments</h3>
+        {% if future_appointments %}
+            <ul>
+                {% for appointment in future_appointments %}
+                    <li>
+                        {{ appointment.date_time|date:"F j, Y" }} at {{ appointment.date_time|time:"g:i A" }}
+                        <form method="post" action="{% url 'cancel_appointment' appointment.id %}">
+                            {% csrf_token %}
+                            <button type="submit">Cancel Appointment</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No future appointments available.</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <h3>Your Past Appointments</h3>
+        {% if past_appointments %}
+            <ul>
+                {% for appointment in past_appointments %}
+                    <li>
+                        {{ appointment.date_time|date:"F j, Y" }} at {{ appointment.date_time|time:"g:i A" }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No past appointments available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Logout link -->
+    <div>
+        <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#id_date_time').change(function() {
+                var selectedDate = $(this).val();
+                $.ajax({
+                    url: '{% url "get_available_hours" %}',
+                    data: {
+                        'selected_date': selectedDate
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var timeSelect = $('#id_time');
+                        timeSelect.empty();
+                        $.each(data.available_hours, function(index, hour) {
+                            timeSelect.append($('<option></option>').attr('value', hour).text(hour));
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

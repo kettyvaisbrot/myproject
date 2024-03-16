@@ -1,0 +1,6 @@
+Dear {{ customer_name }},
+
+Your appointment scheduled for {{ appointment_datetime }} has been canceled.
+
+Thank you for using our service.
+

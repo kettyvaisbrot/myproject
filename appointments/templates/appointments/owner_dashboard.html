@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'appointments/styles.css' %}">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            width: 200px;
+            margin-right: 20px;
+            align-self: flex-start;
+        }
+
+        a {
+            display: block;
+            color: #337ab7;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #f9f9f9;
+        }
+
+        section {
+            display: none;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Owner Dashboard</h2>
+        <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+    </header>
+
+    
+    <nav>
+        <a onclick="showSection('messages')">Messages</a>
+        <a onclick="showSection('update-hours')">Update Business Hours</a>
+        <a onclick="showSection('appointments')">All Appointments</a>
+    </nav>
+
+    <section id="messages">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    <section id="update-hours">
+        <h3>Update Business Hours:</h3>
+        <form method="post" action="">
+            {% csrf_token %}
+            
+            {% for field in form.visible_fields %}
+                <div>
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+            {% endfor %}
+            
+            <button type="submit">Update Business Hours</button>
+        </form>
+    </section>
+
+    <section id="appointments">
+        <h3>All Appointments</h3>
+        {% if appointments %}
+            <ul>
+                {% for appointment in appointments %}
+                    <li>{{ appointment.customer.username }} - {{ appointment.date_time|date:"F j, Y" }}, {{ appointment.time|time:"g:i A" }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No appointments available.</p>
+        {% endif %}
+    </section>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => section.style.display = 'none');
+
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.style.display = 'block';
+            }
+        }
+    </script>
+
+
+    
+ 
+</body>
+</html>
